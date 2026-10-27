@@ -270,7 +270,9 @@ class DiaryEntry(Base):
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, onupdate=utcnow)
 
-    photos: Mapped[list["Photo"]] = relationship(lazy="selectin", order_by="Photo.id")
+    photos: Mapped[list["Photo"]] = relationship(
+        lazy="selectin", order_by="Photo.id", cascade="all, delete-orphan", passive_deletes=True
+    )
     measurement: Mapped[Measurement | None] = relationship(lazy="joined")
     occurrence: Mapped[TaskOccurrence | None] = relationship(lazy="joined")
 

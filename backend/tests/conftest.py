@@ -88,3 +88,33 @@ def plant(db):
     db.add(item)
     db.commit()
     return item
+
+
+PASSWORD = "una-password-robusta"
+
+
+@pytest.fixture
+def anon_client():
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    with TestClient(app, base_url="http://testserver/") as client:
+        yield client
+
+
+@pytest.fixture
+def client(db, anon_client):
+    from app.models import User
+    from app.security import hash_password
+
+    db.add(User(username="admin", password_hash=hash_password(PASSWORD)))
+    db.commit()
+    response = anon_client.post("/api/auth/login", json={"username": "admin", "password": PASSWORD})
+    assert response.status_code == 200, response.text
+    anon_client.headers["X-CSRF-Token"] = response.json()["csrf_token"]
+    return anon_client
+
+
+JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 64
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
