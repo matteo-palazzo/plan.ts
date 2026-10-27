@@ -112,7 +112,7 @@ function ListEditor<T extends NamedItem>(props: ListEditorProps<T>) {
             ) : (
               <li key={item.id}>
                 <span>
-                  {props.renderLabel(item)} <span className="muted small">· {item.plant_count} piante</span>
+                  {props.renderLabel(item)} <span className="muted small">· {item.plant_count === 1 ? "1 pianta" : `${item.plant_count} piante`}</span>
                 </span>
                 <span className="button-row">
                   <Button
@@ -179,7 +179,11 @@ function GroupsSection() {
       create={(name) => groups.create(name, null)}
       rename={(group, name) => groups.update(group.id, name, group.description)}
       remove={(group) => groups.remove(group.id)}
-      deleteMessage={(group) => `Le ${group.plant_count} piante del gruppo resteranno senza gruppo. Le piante non vengono eliminate.`}
+      deleteMessage={(group) =>
+        group.plant_count
+          ? `Le piante del gruppo (${group.plant_count}) resteranno senza gruppo. Le piante non vengono eliminate.`
+          : "Il gruppo non contiene piante."
+      }
     />
   );
 }
@@ -200,7 +204,11 @@ function TagsSection() {
       create={(name, color) => tags.create({ name, color, description: null })}
       rename={(tag, name, color) => tags.update(tag.id, { name, color, description: tag.description })}
       remove={(tag) => tags.remove(tag.id)}
-      deleteMessage={(tag) => `Il tag verrà tolto da ${tag.plant_count} piante. Le piante non vengono eliminate.`}
+      deleteMessage={(tag) =>
+        tag.plant_count
+          ? `Il tag verrà tolto dalle piante che lo usano (${tag.plant_count}). Le piante non vengono eliminate.`
+          : "Il tag non è assegnato a nessuna pianta."
+      }
     />
   );
 }

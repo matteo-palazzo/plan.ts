@@ -117,7 +117,14 @@ export function Dialog({ open, title, onClose, children, footer, wide }: DialogP
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
+    if (open && !dialog.open) {
+      dialog.showModal();
+      dialog
+        .querySelector<HTMLElement>(
+          ".dialog-body :is(input:not([type=hidden], [type=radio], [type=checkbox], [type=file]), textarea, select)",
+        )
+        ?.focus();
+    }
     if (!open && dialog.open) dialog.close();
   }, [open]);
 

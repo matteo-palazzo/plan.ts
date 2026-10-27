@@ -33,7 +33,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       const id = nextId.current++;
       const toast: Toast = { id, message, tone: options.tone ?? "info", actions: options.actions ?? [] };
       setToasts((current) => [...current.slice(-2), toast]);
-      window.setTimeout(() => dismiss(id), options.duration ?? (toast.actions.length ? 8000 : 3500));
+      window.setTimeout(() => dismiss(id), options.duration ?? (toast.actions.length ? 15000 : 3500));
     },
     [dismiss],
   );

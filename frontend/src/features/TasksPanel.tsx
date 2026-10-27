@@ -51,7 +51,7 @@ export function TasksPanel({ plantId, archived }: { plantId: number; archived: b
                   <strong>{task.name}</strong>
                   <span className="muted">
                     {describeRecurrence(task.recurrence, task.interval_days, task.calendar_rule)}
-                    {task.is_suspended && task.suspended_until ? ` · sospeso fino al ${formatDate(task.suspended_until)}` : ""}
+                    {task.is_suspended && task.suspended_until ? ` · sospeso, riprende ${formatDate(task.suspended_until)}` : ""}
                     {task.status === "disabled" ? " · disattivato" : ""}
                   </span>
                 </span>
@@ -170,7 +170,7 @@ function TaskDetails({ task, onClose, onEdit, onChanged }: DetailsProps) {
         ) : null}
       </dl>
 
-      <div className="button-row">
+      <div className="action-row">
         <Button onClick={onEdit}>Modifica</Button>
         {task.status === "active" ? (
           <Button variant="ghost" busy={busy === "disable"} onClick={() => run("disable", () => tasks.setActive(task.id, false), "Task disattivato")}>
@@ -192,7 +192,7 @@ function TaskDetails({ task, onClose, onEdit, onChanged }: DetailsProps) {
           {task.is_suspended && task.suspended_until ? (
             <div className="button-row">
               <p>
-                Sospeso fino al <strong>{formatDate(task.suspended_until)}</strong> (escluso).
+                Sospeso: torna attivo <strong>{formatDate(task.suspended_until)}</strong>.
               </p>
               <Button busy={busy === "resume"} onClick={() => run("resume", () => tasks.resume(task.id), "Task riattivato")}>
                 Riattiva ora

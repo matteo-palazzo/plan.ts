@@ -14,7 +14,9 @@ export default function MeasurementChart({ kind, points, range }: { kind: Measur
   return (
     <figure className="chart">
       <figcaption>
-        <span>{title}</span>
+        <span>
+          {title} <span className="muted">(mm)</span>
+        </span>
         {last ? <span className="muted">ultima: {formatMm(last.value)}</span> : null}
       </figcaption>
       {data.length ? (
@@ -32,11 +34,11 @@ export default function MeasurementChart({ kind, points, range }: { kind: Measur
                 minTickGap={24}
               />
               <YAxis
-                width={52}
+                width={44}
                 tick={{ fontSize: 12, fill: "var(--muted)" }}
                 domain={["auto", "auto"]}
-                tickFormatter={(value: number) => `${value}`}
-                unit=" mm"
+                allowDecimals={false}
+                tickFormatter={(value: number) => value.toLocaleString("it-IT")}
               />
               <Tooltip
                 labelFormatter={(value) => formatDate(isoDate(new Date(Number(value))))}
