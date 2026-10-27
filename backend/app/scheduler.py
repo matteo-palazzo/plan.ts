@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -38,6 +39,17 @@ def cleanup_job() -> None:
         logger.exception("Errore durante la pulizia delle sessioni scadute")
 
 
+CATCH_UP_AFTER = timedelta(days=8)
+CATCH_UP_DELAY = timedelta(minutes=10)
+
+
+def backup_overdue(moment: datetime) -> bool:
+    last_success = backup.read_status().get("last_success_at")
+    if not last_success:
+        return True
+    return moment - datetime.fromisoformat(last_success) > CATCH_UP_AFTER
+
+
 def start_scheduler() -> BackgroundScheduler:
     settings = get_settings()
     scheduler = BackgroundScheduler(
@@ -46,6 +58,9 @@ def start_scheduler() -> BackgroundScheduler:
     scheduler.add_job(reminders_job, "interval", minutes=settings.notify_check_minutes, id="reminders", next_run_time=now())
     scheduler.add_job(backup_job, CronTrigger.from_crontab(settings.backup_schedule, timezone=settings.zone), id="backup")
     scheduler.add_job(cleanup_job, "cron", hour=4, minute=10, id="sessions-cleanup")
+    if backup_overdue(now()):
+        scheduler.add_job(backup_job, "date", run_date=now() + CATCH_UP_DELAY, id="backup-catch-up")
+        logger.info("Nessun backup riuscito negli ultimi 8 giorni: backup di recupero tra 10 minuti")
     scheduler.start()
     logger.info("Scheduler avviato (backup: %s, promemoria ogni %d minuti)", settings.backup_schedule, settings.notify_check_minutes)
     return scheduler

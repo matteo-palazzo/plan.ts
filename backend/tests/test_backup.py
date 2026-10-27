@@ -139,3 +139,14 @@ def test_backup_api(client):
     assert response.status_code == 200
     body = response.json()
     assert body["last_result"] == "success" and len(body["backups"]) == 1
+
+
+def test_catch_up_backup_when_last_success_is_old(client):
+    from app.scheduler import backup_overdue
+
+    moment = datetime(2026, 3, 20, 10, 0, tzinfo=get_settings().zone)
+    assert backup_overdue(moment)
+    backup._write_status(last_success_at=moment - timedelta(days=3))
+    assert not backup_overdue(moment)
+    backup._write_status(last_success_at=moment - timedelta(days=9))
+    assert backup_overdue(moment)

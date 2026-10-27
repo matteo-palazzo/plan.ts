@@ -65,6 +65,7 @@ def backup_name(moment: datetime) -> str:
 
 def _write_status(**values) -> None:
     settings = get_settings()
+    settings.backup_dir.mkdir(parents=True, exist_ok=True)
     path = settings.backup_dir / STATUS_FILE
     current = read_status()
     current.update(values)
