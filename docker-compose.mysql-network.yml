@@ -1,0 +1,10 @@
+services:
+  backend:
+    networks:
+      - default
+      - mysql
+
+networks:
+  mysql:
+    external: true
+    name: ${MYSQL_DOCKER_NETWORK:?imposta MYSQL_DOCKER_NETWORK nel file .env}

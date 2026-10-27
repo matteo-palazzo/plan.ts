@@ -8,7 +8,7 @@ _workdir = Path(tempfile.mkdtemp(prefix="plants-tests-"))
 os.environ["DATABASE_URL"] = os.environ.get("TEST_DATABASE_URL", f"sqlite:///{_workdir / 'test.db'}")
 os.environ["DATA_DIR"] = str(_workdir / "data")
 os.environ["BACKUP_DIR"] = str(_workdir / "backups")
-os.environ["SECRET_KEY"] = "test-secret-key"
+os.environ["SECRET_KEY"] = "test-secret-key-with-at-least-32-characters"
 os.environ["SCHEDULER_ENABLED"] = "false"
 os.environ["TZ"] = "Europe/Rome"
 os.environ["TELEGRAM_ENABLED"] = "false"

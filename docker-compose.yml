@@ -1,0 +1,43 @@
+name: piante
+
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        APP_UID: ${APP_UID:-1000}
+        APP_GID: ${APP_GID:-1000}
+    image: piante-backend:latest
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+      BACKUP_DIR: /backups
+    volumes:
+      - ${DATA_HOST_DIR:-./data}:/data
+      - ${BACKUP_HOST_DIR:-./backups}:/backups
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    mem_limit: 384m
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  web:
+    build: ./frontend
+    image: piante-web:latest
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${APP_BIND:-0.0.0.0}:${APP_PORT:-8080}:80"
+    restart: unless-stopped
+    mem_limit: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

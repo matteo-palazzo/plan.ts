@@ -12,7 +12,6 @@ APP_VERSION = "1.0.0"
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    app_env: str = "production"
     tz: str = Field(default="Europe/Rome", validation_alias="TZ")
 
     db_host: str = "127.0.0.1"

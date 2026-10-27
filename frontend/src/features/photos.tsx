@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { system } from "../api/endpoints";
 import type { Photo } from "../api/types";
 import { Button, ConfirmDialog } from "../components/ui";
 
@@ -6,8 +7,34 @@ const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 export const MAX_PHOTOS = 10;
 export const MAX_PHOTO_MB = 15;
 
-export function validatePhotos(files: File[], existing = 0, maxMb = MAX_PHOTO_MB): string | null {
-  if (existing + files.length > MAX_PHOTOS) return `Puoi allegare al massimo ${MAX_PHOTOS} foto per voce`;
+interface PhotoLimits {
+  maxPhotos: number;
+  maxMb: number;
+}
+
+let limitsRequest: Promise<PhotoLimits> | null = null;
+
+function usePhotoLimits(): PhotoLimits {
+  const [limits, setLimits] = useState<PhotoLimits>({ maxPhotos: MAX_PHOTOS, maxMb: MAX_PHOTO_MB });
+  useEffect(() => {
+    limitsRequest ??= system
+      .settings()
+      .then((settings) => ({ maxPhotos: settings.photos_per_entry, maxMb: settings.photo_max_mb }))
+      .catch(() => {
+        limitsRequest = null;
+        return { maxPhotos: MAX_PHOTOS, maxMb: MAX_PHOTO_MB };
+      });
+    let active = true;
+    void limitsRequest.then((value) => active && setLimits(value));
+    return () => {
+      active = false;
+    };
+  }, []);
+  return limits;
+}
+
+export function validatePhotos(files: File[], existing = 0, maxMb = MAX_PHOTO_MB, maxPhotos = MAX_PHOTOS): string | null {
+  if (existing + files.length > maxPhotos) return `Puoi allegare al massimo ${maxPhotos} foto per voce`;
   const unsupported = files.find((file) => file.type && !ACCEPTED.includes(file.type));
   if (unsupported) return `Formato non supportato (${unsupported.name}): usa JPEG, PNG o WebP`;
   const tooBig = files.find((file) => file.size > maxMb * 1024 * 1024);
@@ -24,6 +51,7 @@ interface PickerProps {
 export function PhotoPicker({ files, onChange, existing = 0 }: PickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const { maxPhotos, maxMb } = usePhotoLimits();
   const previews = useMemo(() => files.map((file) => URL.createObjectURL(file)), [files]);
 
   useEffect(() => () => previews.forEach((url) => URL.revokeObjectURL(url)), [previews]);
@@ -31,7 +59,7 @@ export function PhotoPicker({ files, onChange, existing = 0 }: PickerProps) {
   function add(list: FileList | null) {
     const incoming = Array.from(list ?? []);
     const next = [...files, ...incoming];
-    const problem = validatePhotos(next, existing);
+    const problem = validatePhotos(next, existing, maxMb, maxPhotos);
     setError(problem);
     if (!problem) onChange(next);
     if (inputRef.current) inputRef.current.value = "";
@@ -65,11 +93,11 @@ export function PhotoPicker({ files, onChange, existing = 0 }: PickerProps) {
           ))}
         </ul>
       ) : null}
-      {existing + files.length < MAX_PHOTOS ? (
+      {existing + files.length < maxPhotos ? (
         <Button onClick={() => inputRef.current?.click()}>📷 Aggiungi foto</Button>
       ) : null}
       <p className="field-hint">
-        Fino a {MAX_PHOTOS} foto per voce, JPEG, PNG o WebP, massimo {MAX_PHOTO_MB} MB ciascuna.
+        Fino a {maxPhotos} foto per voce, JPEG, PNG o WebP, massimo {maxMb} MB ciascuna.
       </p>
       {error ? (
         <p className="field-error" role="alert">

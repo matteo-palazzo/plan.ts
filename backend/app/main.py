@@ -36,8 +36,11 @@ VALIDATION_MESSAGES = {
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    settings = get_settings()
+    if len(settings.secret_key.get_secret_value()) < 32:
+        raise RuntimeError("SECRET_KEY mancante o troppo corta: imposta almeno 32 caratteri casuali nel file .env")
     scheduler = None
-    if get_settings().scheduler_enabled:
+    if settings.scheduler_enabled:
         from app.scheduler import start_scheduler
 
         scheduler = start_scheduler()
