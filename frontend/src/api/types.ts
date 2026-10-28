@@ -82,6 +82,7 @@ export interface Occurrence {
   task_type: TaskType;
   plant_id: number;
   plant_name: string;
+  plant_cover_photo_id: number |null;
   due_date: string;
   status: DisplayStatus;
   completed_at: string | null;

@@ -1018,6 +1018,22 @@ fieldset {
   align-items: flex-start;
 }
 
+.occurrence-cover {
+  flex: 0 0 96px;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+.occurrence-cover img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+}
+
 .occurrence-icon {
   font-size: 1.4rem;
   line-height: 1.2;
@@ -1309,7 +1325,7 @@ fieldset {
 
 .plant-cover img {
   width: 100%;
-  height: 100%;
+  height: 100px;
   object-fit: cover;
 }
 

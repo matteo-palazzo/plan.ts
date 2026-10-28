@@ -178,6 +178,7 @@ class OccurrenceOut(BaseModel):
     task_name: str
     task_type: TaskType
     plant_id: int
+    plant_cover_photo_id: int | None = None
     plant_name: str
     due_date: date
     status: DisplayStatus

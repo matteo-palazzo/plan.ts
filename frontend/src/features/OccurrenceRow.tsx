@@ -13,10 +13,17 @@ export function OccurrenceRow({ occurrence, showPlant = true }: Props) {
   const { complete, skip, busyId } = useTaskActions();
   const busy = busyId === occurrence.id;
   const actionable = occurrence.id !== null && (occurrence.status === "todo" || occurrence.status === "overdue");
-
+  
   return (
     <li className={`occurrence occurrence-${occurrence.status}`}>
       <div className="occurrence-info">
+        <div className="occurrence-cover">
+          {occurrence.plant_cover_photo_id ? (
+            <img src={`/api/photos/${occurrence.plant_cover_photo_id}/file`} alt="" loading="lazy" decoding="async" />
+          ) : (
+            <span aria-hidden="true">❦</span>
+          )}
+        </div>
         <span className="occurrence-icon" aria-hidden="true">
           {TASK_TYPE_ICONS[occurrence.task_type]}
         </span>
